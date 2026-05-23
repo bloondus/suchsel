@@ -1,11 +1,11 @@
 
 ![Suchsel Vorschau](Bildschirmfoto_2026-05-23_20-05-53.png)
 
-# Suchsel form Hell
+# Suchsel 
 
-**Finde oder Stirb** – das ultimative Suchsel für Wortakrobaten!
+**Suchsel* – das ultimative Suchsel für Wortakrobaten!
 
-Tauche ein in ein modernes, herausforderndes Suchsel-Erlebnis mit schweizerdeutschen Wörtern. Die Anwendung bietet ein ansprechendes, responsives Design und ist sowohl als Web-App als auch als Desktop-App (z.B. mit Electron) nutzbar.
+Die Anwendung bietet ein ansprechendes, responsives Design und ist sowohl als Web-App als auch als Desktop-App (z.B. mit Electron) nutzbar.
 
 ## Features
 - **Intuitive Oberfläche:** Modernes, farbenfrohes UI mit Animationen
