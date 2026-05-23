@@ -1,0 +1,14 @@
+{
+  "name": "suchsel-app",
+  "version": "1.0.0",
+  "description": "Suchsel (Wortsuche) als Electron-App für Zorin/Linux",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.2.3"
+  }
+}

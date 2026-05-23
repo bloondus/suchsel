@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Finde oder Stirb</title>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Quicksand', Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+    }
+    #container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100vw;
+      height: 100vh;
+    }
+    h1 {
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+      font-size: 2.7em;
+      text-align: center;
+      color: #3b3b5c;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 8px #e0e7ff;
+    }
+    #suchsel {
+      border-collapse: separate;
+      border-spacing: 6px;
+      margin: 30px 0 20px 0;
+      box-shadow: 0 8px 32px #b6b6e0;
+      background: rgba(255,255,255,0.7);
+      border-radius: 24px;
+      padding: 16px;
+      transition: box-shadow 0.3s;
+    }
+    #suchsel td {
+      width: 56px; height: 56px; text-align: center; font-size: 2.1em;
+      border: none;
+      user-select: none;
+      touch-action: none;
+      cursor: pointer;
+      background: #f4f6fb;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px #e0e7ff;
+      transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+      font-weight: 700;
+      color: #3b3b5c;
+    }
+    #suchsel td.selected {
+      background: #ffe066;
+      box-shadow: 0 0 0 3px #ffd700 inset;
+      color: #222;
+    }
+    #suchsel td.found {
+      background: #8fd19e;
+      color: #222;
+      animation: foundAnim 0.5s;
+    }
+    @keyframes foundAnim {
+      0% { box-shadow: 0 0 0 0 #8fd19e; }
+      70% { box-shadow: 0 0 16px 8px #8fd19e; }
+      100% { box-shadow: 0 0 0 0 #8fd19e; }
+    }
+    #woerter {
+      margin: 20px 0 10px 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 14px;
+      font-size: 1.4em;
+    }
+    #woerter span {
+      margin: 0 8px 8px 0;
+      padding: 8px 20px;
+      border-radius: 16px;
+      background: #e0e7ff;
+      box-shadow: 0 2px 8px #d1d5fa;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #3b3b5c;
+      transition: background 0.2s, color 0.2s;
+    }
+    #woerter .found {
+      background: #8fd19e;
+      color: #222;
+      animation: foundAnim 0.5s;
+    }
+    #nachricht {
+      font-size: 2.5em;
+      color: #1a7f37;
+      margin: 30px 0 10px 0;
+      text-align: center;
+      text-shadow: 0 2px 8px #e0e7ff;
+    }
+    @media (max-width: 900px) {
+      #suchsel td { width: 36px; height: 36px; font-size: 1.2em; }
+      #suchsel { padding: 4px; }
+    }
+    @media (max-width: 600px) {
+      #suchsel td { width: 24px; height: 24px; font-size: 0.9em; }
+      #suchsel { padding: 2px; }
+      h1 { font-size: 1.3em; }
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>Finde oder Stirb</h1>
+    <div id="woerter"></div>
+    <table id="suchsel"></table>
+    <div id="nachricht"></div>
+  </div>
+  <script src="suchsel-tools.js"></script>
+  <script>
+    let woerter = [];
+    let gefunden = new Set();
+    let selecting = false;
+    let selectedCells = [];
+    let gitter = [];
+    const table = document.getElementById('suchsel');
+    const woerterDiv = document.getElementById('woerter');
+    const nachrichtDiv = document.getElementById('nachricht');
+
+    function clearSelection() {
+      selectedCells.forEach(td => td.classList.remove('selected'));
+      selectedCells = [];
+    }
+    function getWordFromSelection() {
+      return selectedCells.map(td => td.textContent).join("");
+    }
+    function markFound(word) {
+      selectedCells.forEach(td => td.classList.add('found'));
+      document.getElementById('wort_' + word).classList.add('found');
+      gefunden.add(word);
+      if (gefunden.size === woerter.length) {
+        nachrichtDiv.textContent = 'sehr sehr geil';
+        setTimeout(() => {
+          nachrichtDiv.textContent = '';
+          neuesSuchsel();
+        }, 2000);
+      }
+    }
+    // Hilfsfunktion: alle Felder zwischen (r1,c1) und (r2,c2) in einer Linie
+    function getLineCells(r1, c1, r2, c2) {
+      const dr = Math.sign(r2 - r1);
+      const dc = Math.sign(c2 - c1);
+      const len = Math.max(Math.abs(r2 - r1), Math.abs(c2 - c1));
+      const cells = [];
+      for (let i = 0; i <= len; i++) {
+        const r = r1 + dr * i;
+        const c = c1 + dc * i;
+        const td = table.querySelector(`td[data-row='${r}'][data-col='${c}']`);
+        if (td) cells.push(td);
+      }
+      return cells;
+    }
+
+    function setupEvents() {
+      let startCell = null;
+      let startRow = null;
+      let startCol = null;
+      let lastRow = null;
+      let lastCol = null;
+      let direction = null;
+
+      table.addEventListener('pointerdown', e => {
+        if (e.target.tagName === 'TD') {
+          selecting = true;
+          clearSelection();
+          startCell = e.target;
+          startRow = parseInt(e.target.dataset.row);
+          startCol = parseInt(e.target.dataset.col);
+          lastRow = startRow;
+          lastCol = startCol;
+          selectedCells = [startCell];
+          startCell.classList.add('selected');
+          direction = null;
+          e.preventDefault();
+        }
+      });
+
+      document.addEventListener('pointermove', e => {
+        if (!selecting) return;
+        // Ermittle das Element unter dem Pointer
+        const elem = document.elementFromPoint(e.clientX, e.clientY);
+        if (elem && elem.tagName === 'TD' && table.contains(elem)) {
+          const r = parseInt(elem.dataset.row);
+          const c = parseInt(elem.dataset.col);
+          if ((r !== lastRow || c !== lastCol)) {
+            // Richtung bestimmen
+            if (!direction && (r !== startRow || c !== startCol)) {
+              const dr = Math.sign(r - startRow);
+              const dc = Math.sign(c - startCol);
+              if (dr === 0 && dc === 0) return;
+              direction = [dr, dc];
+            }
+            // Prüfen, ob in der gleichen Richtung
+            if (direction) {
+              const dr = Math.sign(r - startRow);
+              const dc = Math.sign(c - startCol);
+              if (dr === direction[0] && dc === direction[1]) {
+                clearSelection();
+                selectedCells = getLineCells(startRow, startCol, r, c);
+                selectedCells.forEach(td => td.classList.add('selected'));
+                lastRow = r;
+                lastCol = c;
+              }
+            }
+          }
+        }
+        e.preventDefault();
+      });
+
+      document.addEventListener('pointerup', e => {
+        if (selecting) {
+          selecting = false;
+          const word = getWordFromSelection();
+          if (woerter.includes(word) && !gefunden.has(word)) {
+            markFound(word);
+          } else {
+            clearSelection();
+          }
+        }
+        e.preventDefault();
+      });
+    }
+    function renderSuchsel(gitter, woerterListe) {
+      table.innerHTML = '';
+      for (let i=0; i<gitter.length; i++) {
+        const tr = document.createElement('tr');
+        for (let j=0; j<gitter[i].length; j++) {
+          const td = document.createElement('td');
+          td.textContent = gitter[i][j];
+          td.dataset.row = i;
+          td.dataset.col = j;
+          tr.appendChild(td);
+        }
+        table.appendChild(tr);
+      }
+      woerterDiv.innerHTML = '';
+      woerterListe.forEach(w => {
+        const span = document.createElement('span');
+        span.textContent = w;
+        span.id = 'wort_' + w;
+        woerterDiv.appendChild(span);
+      });
+      gefunden.clear();
+      clearSelection();
+    }
+    async function neuesSuchsel() {
+      const res = await window.suchselTools.neuesSuchsel();
+      gitter = res.gitter;
+      woerter = res.woerter;
+      renderSuchsel(gitter, woerter);
+    }
+    setupEvents();
+    neuesSuchsel();
+  </script>
+</body>
+</html>
