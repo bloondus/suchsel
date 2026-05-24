@@ -1,5 +1,5 @@
 
-![Suchsel Vorschau](Bildschirmfoto_2026-05-23_20-05-53.png)
+
 Demopage: https://bloondus.github.io/suchsel/
 # Suchsel 
 
